@@ -59,7 +59,7 @@ class block_contacts extends block_base {
      $this->content->text = "<script src='https://www.google.com/recaptcha/api.js'></script>";
 //var_dump($CFG->wwwroot);die();
 
-     /* if ($formular->is_cancelled()) {
+     /*  if ($formular->is_cancelled()) {
           redirect($CFG->wwwroot.'');
 
       } else if ($data = $formular->get_data()) {
@@ -79,34 +79,59 @@ class block_contacts extends block_base {
         //}
         //$this->content->text .= $formular->render();
         if(!empty($_POST)) {
+            //var_dump($_POST['nume']);die();
             if(!empty($_POST['g-recaptcha-response'])) {
                 $captcha=$_POST['g-recaptcha-response'];
 
-                $secretKey = "6Lc3hFIUAAAAAOdu4hkzC5loEyJK3AXr3WR5hSwW";
+                $secretKey = "6LczgVIUAAAAAH1Tz4nqBPIaX1PmT_8VOBQR4tmB";
                 $ip = $_SERVER['REMOTE_ADDR'];
                 $response=file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=".$secretKey."&response=".$captcha."&remoteip=".$ip);
                 $responseKeys = json_decode($response,true);
-                if(intval($responseKeys["success"]) !== 1) {
-                    $this->content->text .= '<h2>You are spammer ! Get the @$%K out</h2>';
-                } else {
-                    $this->content->text .= '<h2>Thanks for posting comment.</h2>';
-                }
-            } else {
-              $this->content->text .='<h2>Please check the the captcha form.</h2>';
-            }
+
+if(!empty($_POST['nume']) && !empty($_POST['prenume'])&& !empty($_POST['adresa'])&& !empty($_POST['email'])){
+    $dataobject->nume = $_POST['nume'];
+    $dataobject->prenume = $_POST['prenume'];
+    $dataobject->adresa = $_POST['adresa'];
+    $dataobject->email = $_POST['email'];
+    $DB->insert_record('blocks_contacts', $dataobject);
+}
         }
 
         $this->content->text .= '
-        <form action="'.$CFG->wwwroot.'" method="POST">
+        <form method="POST">
             <div class="form-group">
-             <label for="usr">Name:</label>
-             <input type="text" name="usr" class="form-control" id="usr">
+             <div>
+             <label>Nume:</label>
+             <input type="text" name="nume" class="form-control" >
+             </div>
+             <div>
+             <label>Prenume:</label>
+             <input type="text" name="prenume" class="form-control" >
+             </div>
+             <div>
+             <label>Adresa:</label>
+             <input type="text" name="adresa" class="form-control" >
+             </div>
+             <div>
+             <label>Email:</label>
+             <input type="text" name="email"  class="form-control" >
+             </div>
             </div>
-            <div class="g-recaptcha" data-sitekey="6Lc3hFIUAAAAAE1VGw5PPcQ70NYlMn2gakbjv5I2"></div>
+            <div class="g-recaptcha" data-sitekey="6LczgVIUAAAAAOqCHW2lEPDY41SEc5q1QIhHc6-Z"></div>
           <button type="submit" class="btn btn-default">Submit</button>
         </form>
         ';
 
+        if(intval($responseKeys["success"]) !== 1) {
+            $this->content->text .= '<h4>You are spammer !</h4>';
+        } else {
+            $this->content->text .= '<div class="alert alert-success">
+  <strong>Success!</strong> Contactul a fost salvat.
+</div>';
+        }
+        } else {
+        $this->content->text .='<h4>Please check the the captcha form.</h4>';
+        }
 
         if ($this->content !== NULL) {
             return $this->content;
