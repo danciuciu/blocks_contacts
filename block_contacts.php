@@ -52,38 +52,60 @@ class block_contacts extends block_base {
       //  var_dump($CFG->dirroot);die();
 
 
-      $formular = new \contacts_form();
+      //$formular = new \contacts_form();
 
       $this->content = new \stdClass;
 
+     $this->content->text = "<script src='https://www.google.com/recaptcha/api.js'></script>";
 //var_dump($CFG->wwwroot);die();
 
-      if ($formular->is_cancelled()) {
+     /* if ($formular->is_cancelled()) {
           redirect($CFG->wwwroot.'');
 
       } else if ($data = $formular->get_data()) {
-        //  var_dump($data);die();
-          //insert in DB
+          var_dump($data);die();
           $dataobject = new \stdClass();
           $dataobject->nume = $data->nume;
           $dataobject->prenume = $data->prenume;
           $dataobject->adresa = $data->adresa;
           $dataobject->email = $data->email;
 
-        //  $dataobject->userid= $USER->id;
-        //  var_dump($dataobject);die();
          $DB->insert_record('blocks_contacts', $dataobject);
-         redirect('http://localhost/moodle/my');
+         redirect($CFG->wwwroot);
+         */
     /*$this->content->text.=' div class="alert alert-success">
   <strong>Success!</strong> Indicates a successful or positive action.
 </div>';*/
+        //}
+        //$this->content->text .= $formular->render();
+        if(!empty($_POST)) {
+            if(!empty($_POST['g-recaptcha-response'])) {
+                $captcha=$_POST['g-recaptcha-response'];
+
+                $secretKey = "6Lc3hFIUAAAAAOdu4hkzC5loEyJK3AXr3WR5hSwW";
+                $ip = $_SERVER['REMOTE_ADDR'];
+                $response=file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=".$secretKey."&response=".$captcha."&remoteip=".$ip);
+                $responseKeys = json_decode($response,true);
+                if(intval($responseKeys["success"]) !== 1) {
+                    $this->content->text .= '<h2>You are spammer ! Get the @$%K out</h2>';
+                } else {
+                    $this->content->text .= '<h2>Thanks for posting comment.</h2>';
+                }
+            } else {
+              $this->content->text .='<h2>Please check the the captcha form.</h2>';
+            }
         }
 
-
-
-        $this->content->text = $formular->render();
-
-
+        $this->content->text .= '
+        <form action="'.$CFG->wwwroot.'" method="POST">
+            <div class="form-group">
+             <label for="usr">Name:</label>
+             <input type="text" name="usr" class="form-control" id="usr">
+            </div>
+            <div class="g-recaptcha" data-sitekey="6Lc3hFIUAAAAAE1VGw5PPcQ70NYlMn2gakbjv5I2"></div>
+          <button type="submit" class="btn btn-default">Submit</button>
+        </form>
+        ';
 
 
         if ($this->content !== NULL) {

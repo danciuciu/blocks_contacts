@@ -35,10 +35,10 @@ class contacts_form extends moodleform {
 
         $mform->addElement('text', 'email',  get_string('email', 'block_contacts'));
         $mform->setType('email', PARAM_NOTAGS);
-    $mform->addRule('email', get_string('required'), 'required'/*, '', 'client'*/);
+        $mform->addRule('email', get_string('required'), 'required'/*, '', 'client'*/);
 
 
-
+        $mform->addElement('html','<div class="g-recaptcha" data-sitekey="6Lc3hFIUAAAAAE1VGw5PPcQ70NYlMn2gakbjv5I2"></div>');
 
 
         $buttonarray = array();
