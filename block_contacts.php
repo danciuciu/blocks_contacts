@@ -112,7 +112,7 @@ class block_contacts extends block_base {
                 $response=file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=".$secretKey."&response=".$captcha."&remoteip=".$ip);
                 $responseKeys = json_decode($response,true);
 
-                if(intval($responseKeys["success"]) !== 1 && !empty($_POST['nume']) && !empty($_POST['prenume'])&& !empty($_POST['adresa'])&& !empty($_POST['email'])){
+                if(intval($responseKeys["success"]) == 1 && !empty($_POST['nume']) && !empty($_POST['prenume'])&& !empty($_POST['adresa'])&& !empty($_POST['email'])){
                     $dataobject = new \stdClass;
                     $dataobject->nume = $_POST['nume'];
                     $dataobject->prenume = $_POST['prenume'];
