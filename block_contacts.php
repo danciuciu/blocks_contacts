@@ -78,25 +78,6 @@ class block_contacts extends block_base {
 </div>';*/
         //}
         //$this->content->text .= $formular->render();
-        if(!empty($_POST)) {
-            //var_dump($_POST['nume']);die();
-            if(!empty($_POST['g-recaptcha-response'])) {
-                $captcha=$_POST['g-recaptcha-response'];
-
-                $secretKey = "6LczgVIUAAAAAH1Tz4nqBPIaX1PmT_8VOBQR4tmB";
-                $ip = $_SERVER['REMOTE_ADDR'];
-                $response=file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=".$secretKey."&response=".$captcha."&remoteip=".$ip);
-                $responseKeys = json_decode($response,true);
-
-if(!empty($_POST['nume']) && !empty($_POST['prenume'])&& !empty($_POST['adresa'])&& !empty($_POST['email'])){
-    $dataobject->nume = $_POST['nume'];
-    $dataobject->prenume = $_POST['prenume'];
-    $dataobject->adresa = $_POST['adresa'];
-    $dataobject->email = $_POST['email'];
-    $DB->insert_record('blocks_contacts', $dataobject);
-}
-        }
-
         $this->content->text .= '
         <form method="POST">
             <div class="form-group">
@@ -121,17 +102,41 @@ if(!empty($_POST['nume']) && !empty($_POST['prenume'])&& !empty($_POST['adresa']
           <button type="submit" class="btn btn-default">Submit</button>
         </form>
         ';
+        if(!empty($_POST)) {
+            //var_dump($_POST);die();
+            if(!empty($_POST['g-recaptcha-response'])) {
+                $captcha=$_POST['g-recaptcha-response'];
 
-        if(intval($responseKeys["success"]) !== 1) {
-            $this->content->text .= '<h4>You are spammer !</h4>';
-        } else {
-            $this->content->text .= '<div class="alert alert-success">
-  <strong>Success!</strong> Contactul a fost salvat.
-</div>';
-        }
-        } else {
-        $this->content->text .='<h4>Please check the the captcha form.</h4>';
-        }
+                $secretKey = "6LczgVIUAAAAAH1Tz4nqBPIaX1PmT_8VOBQR4tmB";
+                $ip = $_SERVER['REMOTE_ADDR'];
+                $response=file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=".$secretKey."&response=".$captcha."&remoteip=".$ip);
+                $responseKeys = json_decode($response,true);
+
+                if(intval($responseKeys["success"]) !== 1 && !empty($_POST['nume']) && !empty($_POST['prenume'])&& !empty($_POST['adresa'])&& !empty($_POST['email'])){
+                    $dataobject = new \stdClass;
+                    $dataobject->nume = $_POST['nume'];
+                    $dataobject->prenume = $_POST['prenume'];
+                    $dataobject->adresa = $_POST['adresa'];
+                    $dataobject->email = $_POST['email'];
+                    $DB->insert_record('blocks_contacts', $dataobject);
+
+                    $this->content->text .= '<div class="alert alert-success">
+                <strong>Success!</strong> Contactul a fost salvat.</div>';
+                } else {
+                    $this->content->text .= '<div class="alert alert-danger">
+                    <strong>Danger!</strong> You need to complete all fields ! </div>';
+                }
+            } else {
+                 $this->content->text .='<div class="alert alert-warning">
+             <strong>Warning!</strong> Please check the the captcha form. </div>';
+            }
+         }
+
+
+
+
+
+
 
         if ($this->content !== NULL) {
             return $this->content;
